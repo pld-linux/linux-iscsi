@@ -22,6 +22,8 @@ URL:		http://linux-iscsi.sourceforge.net/
 BuildRequires:	sysfsutils-static
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
+%define		_sbindir	/sbin
+
 %description
 The Linux iSCSI driver acts as an iSCSI protocol initiator to
 transport SCSI requests and responses over an IP network between the
@@ -124,7 +126,7 @@ install *.8 $RPM_BUILD_ROOT%{_mandir}/man8
 
 cd Linux-*/obj
 install init $RPM_BUILD_ROOT%{_sbindir}/iscsi-init
-install iscsi-device iscsi-id iscsi-iname iscsid $RPM_BUILD_ROOT%{_sbindir}
+install iscsi-device iscsi-id iscsi-iname iscsi-ls iscsid $RPM_BUILD_ROOT%{_sbindir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT

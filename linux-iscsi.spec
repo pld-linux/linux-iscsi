@@ -12,7 +12,7 @@ Patch0:		%{name}-Makefile.patch
 Patch1:		%{name}-install.sh.patch
 URL:		http://linux-iscsi.sourceforge.net/
 %{!?_without_dist_kernel:BuildRequires:	kernel-headers}
-Buildroot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 The Linux iSCSI driver acts as an iSCSI protocol initiator to

@@ -1,0 +1,12 @@
+diff -urN linux-iscsi-4.0.1.org/iscsi-id.c linux-iscsi-4.0.1/iscsi-id.c
+--- linux-iscsi-4.0.1.org/iscsi-id.c	2004-06-15 01:06:19.066638616 +0200
++++ linux-iscsi-4.0.1/iscsi-id.c	2004-06-15 01:06:45.273654544 +0200
+@@ -32,7 +32,7 @@
+ #include <sys/ioctl.h>
+ #include <scsi/scsi.h>
+ #include <scsi/scsi_ioctl.h>
+-#include <sysfs/libsysfs.h>
++#include <libsysfs.h>
+ 
+ /*
+  * temporary names for mknod.

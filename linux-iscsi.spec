@@ -1,12 +1,12 @@
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
-Version:	2.1.0.8
+Version:	2.1.2.2
 %define		_rel 1
 Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
-Group:		Tools
-Source0:	http://prdownloads.sourceforge.net/%{name}/%{name}-%{version}.tgz
+Group:		Base/Kernel
+Source0:	ftp://ftp.sourceforge.net/pub/sourceforge/%{name}/%{name}-%{version}.tgz
 Patch0:		%{name}-Makefile.patch
 URL:		http://linux-iscsi.sourceforge.net/
 %{!?_without_dist_kernel:BuildRequires:	kernel-headers}

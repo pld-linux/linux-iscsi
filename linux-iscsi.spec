@@ -1,17 +1,15 @@
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
-Version:	2.1.2.2
-%define		_rel 2
+Version:	4.0.1.1
+%define		_rel 1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
-# Source0-md5:	08bd99f3b14a2177ac326a3ed9423fef
-Patch0:		%{name}-Makefile.patch
-Patch1:		%{name}-install.sh.patch
+# Source0-md5:	52a251da7c8b56c08dde61fa0400eba2
 URL:		http://linux-iscsi.sourceforge.net/
-%{!?_without_dist_kernel:BuildRequires:	kernel-headers}
+BuildRequires:	kernel-module-build
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -58,16 +56,28 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %prep
 %setup -q
-%patch0 -p0
-%patch1 -p0
 
 %build
-%{__make} SMPFLAGS=" -D__SMP__"
-mv `uname`-`uname -m`/kobj/iscsi_mod.o iscsi_mod-smp
-%{__make} clean
-%{__make} SMPFLAGS=  module
+rm -rf build-done include
+install -d build-done/{up,smp}
+ln -sf %{_kernelsrcdir}/config-up .config
+install -d include/{linux,config}
+ln -sf %{_kernelsrcdir}/include/linux/autoconf.h include/linux/autoconf.h
+ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/linux/asm
+touch include/config/MARKER
 
-%{__make} daemons
+%{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
+
+mv iscsi.ko build-done/up/
+%{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 mrproper
+
+ln -sf %{_kernelsrcdir}/config-smp .config
+touch include/config/MARKER
+
+%{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
+
+mv iscsi.ko build-done/smp/
+
 
 %install
 rm -rf $RPM_BUILD_ROOT

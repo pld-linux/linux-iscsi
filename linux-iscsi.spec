@@ -59,19 +59,23 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 %patch0 -p0
 
 %build
-%{__make} CFLAGS="%{rpmcflags}" SMPFLAGS=" -D__SMP__" iscsi.o
-mv iscsi.o iscsi-smp.o
-%{__make} CFLAGS="%{rpmcflags}" SMPFLAGS= 
+%{__make} SMPFLAGS=" -D__SMP__"
+mv `uname`-`uname -m`/kobj/iscsi_mod.o iscsi_mod-smp
+%{__make} clean
+%{__make} SMPFLAGS=  module
+
+%{__make} daemons  
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/{man5,man8},/etc/rc.d}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 
-install iscsi-smp.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc
-install iscsi.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
+install iscsi_mod-smp $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_mod.o
+%{__make} install ROOT=$RPM_BUILD_ROOT BASEDIR=%{_prefix}
+install `uname`-`uname -m`/kobj/iscsi_mod.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
 
-install iscsid iscsilun iscsi-device iscsi-iname $RPM_BUILD_ROOT%{_sbindir}
+#install iscsid iscsilun iscsi-device iscsi-iname $RPM_BUILD_ROOT%{_sbindir}
 install iscsigt iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
 install iscsid.8 $RPM_BUILD_ROOT%{_mandir}/man8/iscsid.8
 install iscsi.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/iscsi.conf.5
@@ -84,6 +88,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_sbindir}*
 %attr(755,root,root) /etc/rc.d/rc.iscsi
+%attr(644,root,root) /etc/iscsi.conf
 %attr(644,root,root) %{_mandir}/man8/*
 %attr(644,root,root) %{_mandir}/man5/*
 

@@ -1,10 +1,10 @@
 #
 # Conditional build:
-%bcond_without  dist_kernel     # allow non-distribution kernel
-%bcond_without  kernel          # don't build kernel modules
-%bcond_without  smp             # don't build SMP module
-%bcond_without  userspace       # don't build userspace module
-%bcond_with     verbose         # verbose build (V=1)
+%bcond_without	dist_kernel	# allow non-distribution kernel
+%bcond_without	kernel		# don't build kernel modules
+%bcond_without	smp		# don't build SMP module
+%bcond_without	userspace	# don't build userspace module
+%bcond_with	verbose		# verbose build (V=1)
 #
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
@@ -79,25 +79,25 @@ cd driver
 mv include include-iscsi
 # kernel module(s)
 for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
-    if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
-        exit 1
-    fi
-    rm -rf include
-    install -d include/{linux,config}
-    ln -sf %{_kernelsrcdir}/config-$cfg .config
-    ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
-    ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
-    touch include/config/MARKER
+	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
+		exit 1
+	fi
+	rm -rf include
+	install -d include/{linux,config}
+	ln -sf %{_kernelsrcdir}/config-$cfg .config
+	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
+	ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
+	touch include/config/MARKER
 
-    %{__make} -C %{_kernelsrcdir} clean \
-        RCS_FIND_IGNORE="-name '*.ko' -o" \
-        M=$PWD O=$PWD \
-        %{?with_verbose:V=1}
-    %{__make} -C %{_kernelsrcdir} modules \
-	CC="%{__cc}" \
-        M=$PWD O=$PWD \
-        %{?with_verbose:V=1}
-    mv iscsi_sfnet{,-$cfg}.ko
+	%{__make} -C %{_kernelsrcdir} clean \
+		RCS_FIND_IGNORE="-name '*.ko' -o" \
+		M=$PWD O=$PWD \
+		%{?with_verbose:V=1}
+	%{__make} -C %{_kernelsrcdir} modules \
+		CC="%{__cc}" \
+		M=$PWD O=$PWD \
+		%{?with_verbose:V=1}
+	mv iscsi_sfnet{,-$cfg}.ko
 done
 cd ..
 %endif
@@ -115,10 +115,10 @@ install -d $RPM_BUILD_ROOT/var/lib/iscsi
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 install iscsi_sfnet-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
-        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_sfnet.ko
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_sfnet.ko
 %if %{with smp} && %{with dist_kernel}
 install iscsi_sfnet-smp.ko \
-        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_sfnet.ko
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_sfnet.ko
 %endif
 %endif
 
@@ -167,7 +167,7 @@ rm -rf $RPM_BUILD_ROOT
 #fi
 
 if ! grep -q "^InitiatorName=[^ \t\n]" /etc/initiatorname.iscsi 2>/dev/null ; then
-	echo "InitiatorName=$(iscsi-iname)"  >> /etc/initiatorname.iscsi
+	echo "InitiatorName=$(iscsi-iname)" >> /etc/initiatorname.iscsi
 fi
 
 %preun
@@ -175,7 +175,7 @@ if [ "$1" = "0" ]; then
 #	if [ -f /var/lock/subsys/iscsi ]; then
 #		/etc/rc.d/init.d/iscsi stop >&2
 #	fi
-        /sbin/chkconfig --del iscsi
+	/sbin/chkconfig --del iscsi
 fi
 
 %if %{with userspace}

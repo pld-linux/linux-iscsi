@@ -9,6 +9,7 @@ Group:		Base/Kernel
 Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
 # Source0-md5:	52a251da7c8b56c08dde61fa0400eba2
 URL:		http://linux-iscsi.sourceforge.net/
+BuildRequires:	kernel-source
 BuildRequires:	kernel-module-build
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -59,40 +60,47 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %build
 rm -rf build-done include
-install -d build-done/{up,smp}
+install -d build-done/{UP,SMP}
 ln -sf %{_kernelsrcdir}/config-up .config
 install -d include/{linux,config}
-ln -sf %{_kernelsrcdir}/include/linux/autoconf.h include/linux/autoconf.h
+ln -sf %{_kernelsrcdir}/include/linux/autoconf-up.h include/linux/autoconf.h
 ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/linux/asm
 touch include/config/MARKER
 
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
 
-mv iscsi.ko build-done/up/
+mv iscsi.ko build-done/UP/
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 mrproper
 
 ln -sf %{_kernelsrcdir}/config-smp .config
+ln -sf %{_kernelsrcdir}/include/linux/autoconf-smp.h include/linux/autoconf.h
 touch include/config/MARKER
 
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
 
-mv iscsi.ko build-done/smp/
+mv iscsi.ko build-done/SMP/
 
+# build daemon
+%{__make} OBJDIR=./build-done daemons
+%{__make} OBJDIR=./build-done tools
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/{man5,man8},/etc/rc.d}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 
-install iscsi_mod-smp $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_mod.o
-%{__make} install ROOT=$RPM_BUILD_ROOT BASEDIR=%{_prefix}
-install `uname`-`uname -m`/kobj/iscsi_mod.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
+install build-done/SMP/* $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc
+install build-done/UP/* $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
 
-#install iscsid iscsilun iscsi-device iscsi-iname $RPM_BUILD_ROOT%{_sbindir}
-install iscsigt iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
+install build-done/iscsid $RPM_BUILD_ROOT%{_sbindir}
+install build-done/iscsigt $RPM_BUILD_ROOT%{_sbindir}
+install iscsi-mountall $RPM_BUILD_ROOT%{_sbindir}
+install iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
+install iscsid-ls.1 $RPM_BUILD_ROOT%{_mandir}/man1/iscsid-ls.1
 install iscsid.8 $RPM_BUILD_ROOT%{_mandir}/man8/iscsid.8
 install iscsi.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/iscsi.conf.5
-#mv $RPM_BUILD_ROOT/etc/rc.d/iscsi $RPM_BUILD_ROOT/etc/rc.d/rc.iscsi
+
+install rc.iscsi $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
 
 %clean
 rm -rf $RPM_BUILD_ROOT

@@ -1,0 +1,29 @@
+--- Makefile.org	Tue Nov 20 21:34:31 2001
++++ Makefile	Thu Sep 12 13:11:25 2002
+@@ -89,7 +89,7 @@
+ CFLAGS = -Wall -Wstrict-prototypes -O2 -DLINUX
+ LDFLAGS=
+ AUTHFLAGS = -Wall -O2
+-MODFLAGS=-fomit-frame-pointer -D__KERNEL__=1 -DMODULE -I$(TOPDIR)/include -I$(TOPDIR)/drivers/scsi
++MODFLAGS=-fomit-frame-pointer -D__KERNEL__=1 -DMODULE -I$(TOPDIR)/include -I$(TOPDIR)/drivers/scsi $(SMPFLAGS)
+ MODVERFLAGS=-DMODVERSIONS -include $(TOPDIR)/include/linux/modversions.h
+ 
+ endif # OS
+@@ -128,7 +128,7 @@
+ ifdef CONFIG_SMP
+ ifeq ($(CONFIG_SMP),y)
+ 	SMP=yes
+-	MODFLAGS += -D__SMP__
++	SMPFLAGS = -D__SMP__
+ endif
+ endif
+ 
+@@ -147,7 +147,7 @@
+ # guess based on the uname output
+ ifeq (SMP, $(findstring SMP, $(shell uname -v)))
+ SMP=guess-yes
+-MODFLAGS += -D__SMP__
++SMPFLAGS = -D__SMP__
+ else
+ SMP=guess-no
+ endif

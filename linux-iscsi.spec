@@ -74,7 +74,9 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %build
 %if %{with kernel}
+sed -i -e "s#\$(pwd)#$(pwd)#g" -e "s#driver/include#driver/include-iscsi#g" driver/Makefile
 cd driver
+mv include include-iscsi
 # kernel module(s)
 for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
     if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
@@ -124,20 +126,21 @@ install iscsi_sfnet-smp.ko \
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 
-install iscsi.conf $RPM_BUILD_ROOT/etc
+install misc/iscsi.conf $RPM_BUILD_ROOT/etc
 :> $RPM_BUILD_ROOT/etc/fstab.iscsi
 :> $RPM_BUILD_ROOT/etc/initiatorname.iscsi
 
 :> $RPM_BUILD_ROOT/var/lib/iscsi/bindings
 
-install iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
-install *.1 $RPM_BUILD_ROOT%{_mandir}/man1
-install *.5 $RPM_BUILD_ROOT%{_mandir}/man5
-install *.8 $RPM_BUILD_ROOT%{_mandir}/man8
+install misc/scripts/iscsi-mountall misc/scripts/iscsi-umountall misc/scripts/iscsi-ls $RPM_BUILD_ROOT%{_sbindir}
+
+install man/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
+install man/*.5 $RPM_BUILD_ROOT%{_mandir}/man5
+install man/*.8 $RPM_BUILD_ROOT%{_mandir}/man8
 
 cd Linux-*/obj
-install init $RPM_BUILD_ROOT%{_sbindir}/iscsi-init
-install iscsi-device iscsi-id iscsi-iname iscsi-ls iscsid $RPM_BUILD_ROOT%{_sbindir}
+install utils/iscsi-boot/init $RPM_BUILD_ROOT%{_sbindir}/iscsi-init
+install utils/iscsi-device utils/iscsi-iname iscsid $RPM_BUILD_ROOT%{_sbindir}
 %endif
 
 %clean

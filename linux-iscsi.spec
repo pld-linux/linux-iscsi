@@ -7,6 +7,7 @@ Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
+# Source0-md5:	08bd99f3b14a2177ac326a3ed9423fef
 Patch0:		%{name}-Makefile.patch
 Patch1:		%{name}-install.sh.patch
 URL:		http://linux-iscsi.sourceforge.net/

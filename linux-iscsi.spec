@@ -106,6 +106,7 @@ done
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/man{1,5,8},/etc/{rc.d/init.d,sysconfig}}
+install -d $RPM_BUILD_ROOT/var/lib/iscsi
 
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
@@ -124,6 +125,8 @@ install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 install iscsi.conf $RPM_BUILD_ROOT/etc
 :> $RPM_BUILD_ROOT/etc/fstab.iscsi
 :> $RPM_BUILD_ROOT/etc/initiatorname.iscsi
+
+:> $RPM_BUILD_ROOT/var/lib/iscsi/bindings
 
 install iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
 install *.1 $RPM_BUILD_ROOT%{_mandir}/man1
@@ -178,6 +181,8 @@ fi
 %attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsi.conf
 %attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/fstab.iscsi
 %attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/initiatorname.iscsi
+%dir /var/lib/iscsi
+%ghost /var/lib/iscsi/bindings
 %attr(644,root,root) %{_mandir}/man?/*
 %attr(754,root,root) /etc/rc.d/init.d/iscsi
 %attr(640,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/sysconfig/iscsi

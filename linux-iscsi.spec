@@ -1,17 +1,25 @@
+%bcond_without  dist_kernel     # allow non-distribution kernel
+%bcond_without  kernel          # don't build kernel modules
+%bcond_without  smp             # don't build SMP module
+%bcond_without  userspace       # don't build userspace module
+%bcond_with     verbose         # verbose build (V=1)
+
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
-Version:	2.1.2.2
-%define		_rel 2
+Version:	4.0.1.6
+%define		_rel 1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
-# Source0-md5:	08bd99f3b14a2177ac326a3ed9423fef
-Patch0:		%{name}-Makefile.patch
-Patch1:		%{name}-install.sh.patch
+Source1:	%{name}.init
+Source2:	%{name}.sysconfig
+Patch0:		%{name}-sysfs.patch
+# Source0-md5:	a436345c3e45b9c9fd3dac91a22de588
 URL:		http://linux-iscsi.sourceforge.net/
-%{!?_without_dist_kernel:BuildRequires:	kernel-headers}
+%{?with_dist_kernel:BuildRequires:	kernel-headers >= 2.6.0}
+BuildRequires:	sysfsutils-static
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -58,48 +66,116 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %prep
 %setup -q
-%patch0 -p0
-%patch1 -p0
+%patch0 -p1
 
 %build
-%{__make} SMPFLAGS=" -D__SMP__"
-mv `uname`-`uname -m`/kobj/iscsi_mod.o iscsi_mod-smp
-%{__make} clean
-%{__make} SMPFLAGS=  module
+%if %{with kernel}
+# kernel module(s)
+for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
+    if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
+        exit 1
+    fi
+    rm -rf include
+    install -d include/{linux,config}
+    ln -sf %{_kernelsrcdir}/config-$cfg .config
+    ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
+    ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
+    touch include/config/MARKER
 
-%{__make} daemons
+    %{__make} -C %{_kernelsrcdir} clean \
+        RCS_FIND_IGNORE="-name '*.ko' -o" \
+        M=$PWD O=$PWD \
+        %{?with_verbose:V=1}
+    %{__make} -C %{_kernelsrcdir} modules \
+        M=$PWD O=$PWD \
+        %{?with_verbose:V=1}
+    mv iscsi_sfnet{,-$cfg}.ko
+done
+%endif
+
+%{__make} user \
+	CC="%{__cc}"
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/{man5,man8},/etc/rc.d}
+install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/man{1,5,8},/etc/{rc.d/init.d,sysconfig}}
+
+%if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
+install iscsi_sfnet-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
+        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_sfnet.ko
+%if %{with smp} && %{with dist_kernel}
+install iscsi_sfnet-smp.ko \
+        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_sfnet.ko
+%endif
+%endif
 
-install iscsi_mod-smp $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_mod.o
-%{__make} install ROOT=$RPM_BUILD_ROOT BASEDIR=%{_prefix}
-install `uname`-`uname -m`/kobj/iscsi_mod.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
+install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
+install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 
-#install iscsid iscsilun iscsi-device iscsi-iname $RPM_BUILD_ROOT%{_sbindir}
-install iscsigt iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
-install iscsid.8 $RPM_BUILD_ROOT%{_mandir}/man8/iscsid.8
-install iscsi.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/iscsi.conf.5
-#mv $RPM_BUILD_ROOT/etc/rc.d/iscsi $RPM_BUILD_ROOT/etc/rc.d/rc.iscsi
+install iscsi.conf $RPM_BUILD_ROOT/etc/
+:> $RPM_BUILD_ROOT/etc/fstab.iscsi
+
+install iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
+install *.1 $RPM_BUILD_ROOT%{_mandir}/man1
+install *.5 $RPM_BUILD_ROOT%{_mandir}/man5
+install *.8 $RPM_BUILD_ROOT%{_mandir}/man8
+
+cd Linux-*/obj
+install init $RPM_BUILD_ROOT%{_sbindir}/iscsi-init
+install iscsi-device iscsi-id iscsi-iname iscsid $RPM_BUILD_ROOT%{_sbindir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%post -n kernel-iscsi
+%depmod %{_kernel_ver}
+
+%postun -n kernel-iscsi
+%depmod %{_kernel_ver}
+
+%post -n kernel-smp-iscsi
+%depmod %{_kernel_ver}smp
+
+%postun -n kernel-smp-iscsi
+%depmod %{_kernel_ver}smp
+
+%post
+/sbin/chkconfig --add iscsi
+#if [ -f /var/lock/subsys/iscsi ]; then
+#	/etc/rc.d/init.d/iscsi restart 1>&2
+#else
+#	echo "Type \"/etc/rc.d/init.d/iscsi start\" to start iscsi" 1>&2
+#fi
+
+%preun
+if [ "$1" = "0" ]; then
+#	if [ -f /var/lock/subsys/iscsi ]; then
+#		/etc/rc.d/init.d/iscsi stop >&2
+#	fi
+        /sbin/chkconfig --del iscsi
+fi
+
+%if %{with userspace}
 %files
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_sbindir}*
-%attr(755,root,root) /etc/rc.d/iscsi
-%attr(644,root,root) /etc/iscsi.conf
-%attr(644,root,root) /etc/initiatorname.iscsi
-%attr(644,root,root) %{_mandir}/man8/*
-%attr(644,root,root) %{_mandir}/man5/*
+%doc README
+%attr(755,root,root) %{_sbindir}/*
+%attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsi.conf
+%config(noreplace) %verify(not mtime md5 size) /etc/fstab.iscsi
+%attr(644,root,root) %{_mandir}/man?/*
+%attr(754,root,root) /etc/rc.d/init.d/iscsi
+%attr(640,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/sysconfig/iscsi
+%endif
 
+%if %{with kernel}
 %files -n kernel-iscsi
 %defattr(644,root,root,755)
 %attr(644,root,root) /lib/modules/%{_kernel_ver}/misc/*
 
+%if %{with smp} && %{with dist_kernel}
 %files -n kernel-smp-iscsi
 %defattr(644,root,root,755)
 %attr(644,root,root) /lib/modules/%{_kernel_ver}smp/misc/*
+%endif
+%endif

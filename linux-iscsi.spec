@@ -14,7 +14,7 @@ Version:	4.0.2
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
-Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
+Source0:	http://dl.sourceforge.net/linux-iscsi/%{name}-%{version}.tgz
 # Source0-md5:	da77c95464a57abe2cdd8d00323bb477
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig

@@ -2,12 +2,13 @@ Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
 Version:	2.1.2.2
-%define		_rel 1
-Release:	%{_rel}@%{_kernel_ver_str}
+%define		_rel 2
+Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
 Source0:	ftp://ftp.sourceforge.net/pub/sourceforge/%{name}/%{name}-%{version}.tgz
 Patch0:		%{name}-Makefile.patch
+Patch1:		%{name}-install.sh.patch
 URL:		http://linux-iscsi.sourceforge.net/
 %{!?_without_dist_kernel:BuildRequires:	kernel-headers}
 Buildroot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -57,6 +58,7 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 %prep
 %setup -q
 %patch0 -p0
+%patch1 -p0
 
 %build
 %{__make} SMPFLAGS=" -D__SMP__"

@@ -115,6 +115,7 @@ install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 
 install iscsi.conf $RPM_BUILD_ROOT/etc/
 :> $RPM_BUILD_ROOT/etc/fstab.iscsi
+:> $RPM_BUILD_ROOT/etc/initiatorname.iscsi
 
 install iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
 install *.1 $RPM_BUILD_ROOT%{_mandir}/man1
@@ -148,6 +149,10 @@ rm -rf $RPM_BUILD_ROOT
 #	echo "Type \"/etc/rc.d/init.d/iscsi start\" to start iscsi" 1>&2
 #fi
 
+if ! grep -q "^InitiatorName=[^ \t\n]" /etc/initiatorname.iscsi 2>/dev/null ; then
+	echo "InitiatorName=$(iscsi-iname)"  >> /etc/initiatorname.iscsi
+fi
+
 %preun
 if [ "$1" = "0" ]; then
 #	if [ -f /var/lock/subsys/iscsi ]; then
@@ -162,7 +167,8 @@ fi
 %doc README
 %attr(755,root,root) %{_sbindir}/*
 %attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsi.conf
-%config(noreplace) %verify(not mtime md5 size) /etc/fstab.iscsi
+%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/fstab.iscsi
+%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/initiatorname.iscsi
 %attr(644,root,root) %{_mandir}/man?/*
 %attr(754,root,root) /etc/rc.d/init.d/iscsi
 %attr(640,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/sysconfig/iscsi

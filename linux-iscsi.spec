@@ -16,7 +16,7 @@ Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Patch0:		%{name}-sysfs.patch
-# Source0-md5:	a436345c3e45b9c9fd3dac91a22de588
+# Source0-md5:	d6e3748bc19b851f2d360473fec9e445
 URL:		http://linux-iscsi.sourceforge.net/
 %{?with_dist_kernel:BuildRequires:	kernel-headers >= 2.6.0}
 BuildRequires:	sysfsutils-static

@@ -91,14 +91,17 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
         M=$PWD O=$PWD \
         %{?with_verbose:V=1}
     %{__make} -C %{_kernelsrcdir} modules \
+	CC="%{__cc}" \
         M=$PWD O=$PWD \
         %{?with_verbose:V=1}
     mv iscsi_sfnet{,-$cfg}.ko
 done
 %endif
 
+%if %{with userspace}
 %{__make} user \
 	CC="%{__cc}"
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -114,6 +117,7 @@ install iscsi_sfnet-smp.ko \
 %endif
 %endif
 
+%if %{with userspace}
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 
@@ -129,6 +133,7 @@ install *.8 $RPM_BUILD_ROOT%{_mandir}/man8
 cd Linux-*/obj
 install init $RPM_BUILD_ROOT%{_sbindir}/iscsi-init
 install iscsi-device iscsi-id iscsi-iname iscsi-ls iscsid $RPM_BUILD_ROOT%{_sbindir}
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT

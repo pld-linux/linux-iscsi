@@ -81,7 +81,7 @@ install `uname`-`uname -m`/kobj/iscsi_mod.o $RPM_BUILD_ROOT/lib/modules/%{_kerne
 install iscsigt iscsi-mountall iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
 install iscsid.8 $RPM_BUILD_ROOT%{_mandir}/man8/iscsid.8
 install iscsi.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/iscsi.conf.5
-install rc.iscsi $RPM_BUILD_ROOT/etc/rc.d/
+#mv $RPM_BUILD_ROOT/etc/rc.d/iscsi $RPM_BUILD_ROOT/etc/rc.d/rc.iscsi
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -89,8 +89,9 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_sbindir}*
-%attr(755,root,root) /etc/rc.d/rc.iscsi
+%attr(755,root,root) /etc/rc.d/iscsi
 %attr(644,root,root) /etc/iscsi.conf
+%attr(644,root,root) /etc/initiatorname.iscsi
 %attr(644,root,root) %{_mandir}/man8/*
 %attr(644,root,root) %{_mandir}/man5/*
 

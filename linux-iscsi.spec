@@ -6,7 +6,7 @@ Version:	2.1.2.2
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
-Source0:	ftp://ftp.sourceforge.net/pub/sourceforge/%{name}/%{name}-%{version}.tgz
+Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
 Patch0:		%{name}-Makefile.patch
 Patch1:		%{name}-install.sh.patch
 URL:		http://linux-iscsi.sourceforge.net/

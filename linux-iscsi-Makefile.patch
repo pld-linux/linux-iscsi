@@ -1,29 +1,11 @@
---- Makefile.org	Tue Nov 20 21:34:31 2001
-+++ Makefile	Thu Sep 12 13:11:25 2002
-@@ -89,7 +89,7 @@
- KERNELCC:=gcc
- CFLAGS:= -Wall -Wstrict-prototypes -O2 -DLINUX
- LDFLAGS:=
--MODFLAGS:=-D__KERNEL__=1 -DMODULE -I$(TOPDIR)/include -I$(TOPDIR)/drivers/scsi
-+MODFLAGS:=-D__KERNEL__=1 -DMODULE -I$(TOPDIR)/include -I$(TOPDIR)/drivers/scsi $(SMPFLAGS)
- MODVERFLAGS:=-DMODVERSIONS -include $(TOPDIR)/include/linux/modversions.h
+--- linux-iscsi-4.0.1.1/Makefile.org	2004-03-10 14:12:30.000000000 +0000
++++ linux-iscsi-4.0.1.1/Makefile	2004-03-18 11:40:38.000000000 +0000
+@@ -346,7 +346,7 @@
+ all:: dirs module daemons utils tools permissions checkkernel checkscsi checkcrypto
+ module: dirs checkkernel 
+ daemons:  dirs $(OBJDIR)/iscsid
+-utils: dirs $(OBJDIR)/iscsi-device $(OBJDIR)/iscsi-iname $(OBJDIR)/iscsi-ls $(OBJDIR)/init $(OBJDIR)/iscsi-id
++utils: dirs $(OBJDIR)/iscsi-device $(OBJDIR)/iscsi-iname $(OBJDIR)/iscsi-ls $(OBJDIR)/init
+ #
+ test: dirs $(OBJDIR)/bindings
  
- endif # OS
-@@ -128,7 +128,7 @@
- ifdef CONFIG_SMP
- ifeq ($(CONFIG_SMP),y)
- 	SMP=yes
--	MODFLAGS += -D__SMP__
-+	SMPFLAGS = -D__SMP__
- endif
- endif
- 
-@@ -147,7 +147,7 @@
- # guess based on the uname output
- ifeq (SMP, $(findstring SMP, $(shell uname -v)))
- SMP=guess-yes
--MODFLAGS += -D__SMP__
-+SMPFLAGS = -D__SMP__
- else
- SMP=guess-no
- endif

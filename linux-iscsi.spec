@@ -1,13 +1,13 @@
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
-Version:	4.0.1.1
-%define		_rel 2
+Version:	4.0.1.3
+%define		_rel 1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
-# Source0-md5:	52a251da7c8b56c08dde61fa0400eba2
+# Source0-md5:	f88846e1a1de36efba963978489f02b6
 Patch0:		%{name}-Makefile.patch
 URL:		http://linux-iscsi.sourceforge.net/
 BuildRequires:	kernel-source
@@ -72,7 +72,7 @@ touch include/config/MARKER
 
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
 
-mv iscsi.ko build-done/UP/
+mv iscsi_sfnet.ko build-done/UP/
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 mrproper
 
 ln -sf %{_kernelsrcdir}/config-smp .config
@@ -81,7 +81,7 @@ touch include/config/MARKER
 
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
 
-mv iscsi.ko build-done/SMP/
+mv iscsi_sfnet.ko build-done/SMP/
 
 # build daemon
 %{__make} OBJDIR=./build-done daemons

@@ -1,9 +1,11 @@
+#
+# Conditional build:
 %bcond_without  dist_kernel     # allow non-distribution kernel
 %bcond_without  kernel          # don't build kernel modules
 %bcond_without  smp             # don't build SMP module
 %bcond_without  userspace       # don't build userspace module
 %bcond_with     verbose         # verbose build (V=1)
-
+#
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
@@ -45,7 +47,7 @@ Summary:	ISCSI kernel module
 Summary(pl):	Modu³ j±dra ISCSI
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 
 %description -n kernel-iscsi
 IP over SCSI kernel module.
@@ -58,7 +60,7 @@ Summary:	ISCSI SMP kernel module
 Summary(pl):	Modu³ j±dra SMP ISCSI
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 
 %description -n kernel-smp-iscsi
 IP over SCSI SMP kernel module.
@@ -115,7 +117,7 @@ install iscsi_sfnet-smp.ko \
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 
-install iscsi.conf $RPM_BUILD_ROOT/etc/
+install iscsi.conf $RPM_BUILD_ROOT/etc
 :> $RPM_BUILD_ROOT/etc/fstab.iscsi
 :> $RPM_BUILD_ROOT/etc/initiatorname.iscsi
 

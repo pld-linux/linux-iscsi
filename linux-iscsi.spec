@@ -44,7 +44,7 @@ IP over SCSI kernel module.
 Modu³ j±dra dla protoko³u IP over SCSI.
 
 %package -n kernel-smp-iscsi
-Summary:	ISCSI SMP kernel module	
+Summary:	ISCSI SMP kernel module
 Summary(pl):	Modu³ j±dra SMP ISCSI
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
@@ -67,7 +67,7 @@ mv `uname`-`uname -m`/kobj/iscsi_mod.o iscsi_mod-smp
 %{__make} clean
 %{__make} SMPFLAGS=  module
 
-%{__make} daemons  
+%{__make} daemons
 
 %install
 rm -rf $RPM_BUILD_ROOT

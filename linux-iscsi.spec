@@ -2,15 +2,17 @@ Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
 Version:	4.0.1.1
-%define		_rel 1
+%define		_rel 2
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
 # Source0-md5:	52a251da7c8b56c08dde61fa0400eba2
+Patch0:		%{name}-Makefile.patch
 URL:		http://linux-iscsi.sourceforge.net/
 BuildRequires:	kernel-source
 BuildRequires:	kernel-module-build
+BuildRequires:	glibc-static
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -57,6 +59,7 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 rm -rf build-done include
@@ -83,20 +86,21 @@ mv iscsi.ko build-done/SMP/
 # build daemon
 %{__make} OBJDIR=./build-done daemons
 %{__make} OBJDIR=./build-done tools
+%{__make} OBJDIR=./build-done utils
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/{man5,man8},/etc/rc.d}
+install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/{man1,man5,man8},/etc/rc.d/init.d}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 
 install build-done/SMP/* $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc
 install build-done/UP/* $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
 
-install build-done/iscsid $RPM_BUILD_ROOT%{_sbindir}
-install build-done/iscsigt $RPM_BUILD_ROOT%{_sbindir}
-install iscsi-mountall $RPM_BUILD_ROOT%{_sbindir}
-install iscsi-umountall $RPM_BUILD_ROOT%{_sbindir}
-install iscsid-ls.1 $RPM_BUILD_ROOT%{_mandir}/man1/iscsid-ls.1
+install build-done/{iscsid,iscsigt,iscsi-device,iscsi-iname,iscsi-ls} $RPM_BUILD_ROOT%{_sbindir}
+install {iscsi-*mountall,mkinitrd.iscsi} $RPM_BUILD_ROOT%{_sbindir}
+install iscsi.conf $RPM_BUILD_ROOT/etc
+install iscsi-ls.1 $RPM_BUILD_ROOT%{_mandir}/man1/iscsi-ls.1
 install iscsid.8 $RPM_BUILD_ROOT%{_mandir}/man8/iscsid.8
 install iscsi.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5/iscsi.conf.5
 
@@ -108,11 +112,11 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_sbindir}*
-%attr(755,root,root) /etc/rc.d/iscsi
+%attr(755,root,root) /etc/rc.d/init.d/iscsi
 %attr(644,root,root) /etc/iscsi.conf
-%attr(644,root,root) /etc/initiatorname.iscsi
 %attr(644,root,root) %{_mandir}/man8/*
 %attr(644,root,root) %{_mandir}/man5/*
+%attr(644,root,root) %{_mandir}/man1/*
 
 %files -n kernel-iscsi
 %defattr(644,root,root,755)

@@ -9,16 +9,16 @@
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
-Version:	4.0.1.6
-%define		_rel 1
+Version:	4.0.2
+%define		_rel 0.1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://dl.sourceforge.net/%{name}/%{name}-%{version}.tgz
+# Source0-md5:	da77c95464a57abe2cdd8d00323bb477
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 Patch0:		%{name}-sysfs.patch
-# Source0-md5:	d6e3748bc19b851f2d360473fec9e445
 URL:		http://linux-iscsi.sourceforge.net/
 %{?with_dist_kernel:BuildRequires:	kernel-headers >= 2.6.0}
 BuildRequires:	sysfsutils-static
@@ -74,6 +74,7 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %build
 %if %{with kernel}
+cd driver
 # kernel module(s)
 for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
     if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
@@ -96,6 +97,7 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
         %{?with_verbose:V=1}
     mv iscsi_sfnet{,-$cfg}.ko
 done
+cd ..
 %endif
 
 %if %{with userspace}

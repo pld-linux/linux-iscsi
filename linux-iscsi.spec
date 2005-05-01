@@ -32,7 +32,7 @@ transport SCSI requests and responses over an IP network between the
 client and an iSCSI-enabled target device such as a Cisco SN 5420
 storage router. The iSCSI protocol is an IETF-defined protocol for IP
 storage. For more information about the iSCSI protocol, refer to the
-IETF standards for IP storage at http://www.ietf.org/ .
+IETF standards for IP storage at <http://www.ietf.org/>.
 
 %description -l pl
 Sterownik Linux iSCSI zachowuje siê jak inicjator protoko³u iSCSI do
@@ -40,7 +40,7 @@ transportu zleceñ SCSI i odpowiedzi po sieci IP miêdzy klientem a
 urz±dzeniem docelowym obs³uguj±cym iSCSI, takim jak Cisco SN 5420.
 Protokó³ iSCSI jest zdefiniowany przez IETF do sk³adowania IP. Wiêcej
 informacji o protokole iSCSI znajduje siê w standardach IETF na
-http://www.ietf.org/ .
+<http://www.ietf.org/>.
 
 %package -n kernel-iscsi
 Summary:	ISCSI kernel module

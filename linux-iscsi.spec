@@ -1,4 +1,6 @@
 #
+# TODO: init scripts rewrite
+#
 # Conditional build:
 %bcond_without	dist_kernel	# allow non-distribution kernel
 %bcond_without	kernel		# don't build kernel modules
@@ -9,19 +11,18 @@
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
-Version:	4.0.2
+Version:	5.0.0.2
 %define		_rel 0.1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
-Source0:	http://dl.sourceforge.net/linux-iscsi/%{name}-%{version}.tgz
-# Source0-md5:	da77c95464a57abe2cdd8d00323bb477
+Source0:	http://dl.sourceforge.net/linux-iscsi/%{name}-%{version}.tar.gz
+# Source0-md5:	2d29f3c35554e3ea0abf46de39e6b215
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
-Patch0:		%{name}-sysfs.patch
 URL:		http://linux-iscsi.sourceforge.net/
 %{?with_dist_kernel:BuildRequires:	kernel-headers >= 2.6.0}
-BuildRequires:	sysfsutils-static
+BuildRequires:	db-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_sbindir	/sbin
@@ -70,13 +71,10 @@ Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %prep
 %setup -q
-%patch0 -p1
 
 %build
 %if %{with kernel}
-sed -i -e "s#\$(pwd)#$(pwd)#g" -e "s#driver/include#driver/include-iscsi#g" driver/Makefile
-cd driver
-mv include include-iscsi
+cd kernel
 # kernel module(s)
 for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
 	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
@@ -97,14 +95,16 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
 		CC="%{__cc}" \
 		M=$PWD O=$PWD \
 		%{?with_verbose:V=1}
-	mv iscsi_sfnet{,-$cfg}.ko
+	mv iscsi_if{,-$cfg}.ko
+	mv iscsi_tcp{,-$cfg}.ko
 done
 cd ..
 %endif
 
 %if %{with userspace}
-%{__make} user \
-	CC="%{__cc}"
+%{__make} -C usr \
+	CC="%{__cc}" \
+	CFLAGS="%{rpmcflags} -I../include -DNETLINK_ISCSI=10"
 %endif
 
 %install
@@ -114,11 +114,17 @@ install -d $RPM_BUILD_ROOT/var/lib/iscsi
 
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
-install iscsi_sfnet-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_sfnet.ko
+
+install iscsi_if-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_if.ko
+install iscsi_tcp-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
+        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_tcp.ko
+
 %if %{with smp} && %{with dist_kernel}
-install iscsi_sfnet-smp.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_sfnet.ko
+install iscsi_if-smp.ko \
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_if.ko
+install iscsi_tcp-smp.ko \
+        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_tcp.ko
 %endif
 %endif
 
@@ -126,21 +132,9 @@ install iscsi_sfnet-smp.ko \
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 
-install misc/iscsi.conf $RPM_BUILD_ROOT/etc
-:> $RPM_BUILD_ROOT/etc/fstab.iscsi
-:> $RPM_BUILD_ROOT/etc/initiatorname.iscsi
+install etc/iscsid.conf $RPM_BUILD_ROOT/etc
 
-:> $RPM_BUILD_ROOT/var/lib/iscsi/bindings
-
-install misc/scripts/iscsi-mountall misc/scripts/iscsi-umountall misc/scripts/iscsi-ls $RPM_BUILD_ROOT%{_sbindir}
-
-install man/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
-install man/*.5 $RPM_BUILD_ROOT%{_mandir}/man5
-install man/*.8 $RPM_BUILD_ROOT%{_mandir}/man8
-
-cd Linux-*/obj
-install utils/iscsi-boot/init $RPM_BUILD_ROOT%{_sbindir}/iscsi-init
-install utils/iscsi-device utils/iscsi-iname iscsid $RPM_BUILD_ROOT%{_sbindir}
+install usr/iscsid usr/iscsiadm $RPM_BUILD_ROOT%{_sbindir}
 %endif
 
 %clean
@@ -166,10 +160,6 @@ rm -rf $RPM_BUILD_ROOT
 #	echo "Type \"/etc/rc.d/init.d/iscsi start\" to start iscsi" 1>&2
 #fi
 
-if ! grep -q "^InitiatorName=[^ \t\n]" /etc/initiatorname.iscsi 2>/dev/null ; then
-	echo "InitiatorName=$(iscsi-iname)" >> /etc/initiatorname.iscsi
-fi
-
 %preun
 if [ "$1" = "0" ]; then
 #	if [ -f /var/lock/subsys/iscsi ]; then
@@ -181,14 +171,9 @@ fi
 %if %{with userspace}
 %files
 %defattr(644,root,root,755)
-%doc README
+%doc README THANKS TODO
 %attr(755,root,root) %{_sbindir}/*
-%attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsi.conf
-%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/fstab.iscsi
-%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/initiatorname.iscsi
-%dir /var/lib/iscsi
-%ghost /var/lib/iscsi/bindings
-%attr(644,root,root) %{_mandir}/man?/*
+%attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsid.conf
 %attr(754,root,root) /etc/rc.d/init.d/iscsi
 %attr(640,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/sysconfig/iscsi
 %endif

@@ -178,10 +178,10 @@ fi
 %defattr(644,root,root,755)
 %doc README THANKS TODO
 %attr(755,root,root) %{_sbindir}/*
-%attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsid.conf
-%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/initiatorname.iscsi
-%attr(754,root,root) /etc/rc.d/init.d/iscsi
-%attr(640,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/sysconfig/iscsi
+%attr(750,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/iscsid.conf
+%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/initiatorname.iscsi
+%attr(754,root,root) /etc/rc.d/init.d/iscsi            
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/iscsi
 %endif
 
 %if %{with kernel}

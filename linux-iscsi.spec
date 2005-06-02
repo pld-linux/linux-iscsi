@@ -110,7 +110,6 @@ cd ..
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/man{1,5,8},/etc/{rc.d/init.d,sysconfig}}
-install -d $RPM_BUILD_ROOT/var/lib/iscsi
 
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
@@ -131,6 +130,8 @@ install kernel/iscsi_tcp-smp.ko \
 %if %{with userspace}
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
+
+:> $RPM_BUILD_ROOT/etc/initiatorname.iscsi
 
 install etc/iscsid.conf $RPM_BUILD_ROOT/etc
 
@@ -160,6 +161,10 @@ rm -rf $RPM_BUILD_ROOT
 #	echo "Type \"/etc/rc.d/init.d/iscsi start\" to start iscsi" 1>&2
 #fi
 
+if ! grep -q "^InitiatorName=[^ \t\n]" /etc/initiatorname.iscsi 2>/dev/null ; then
+	echo "InitiatorName=$(hostname -f)" >> /etc/initiatorname.iscsi
+fi
+
 %preun
 if [ "$1" = "0" ]; then
 #	if [ -f /var/lock/subsys/iscsi ]; then
@@ -174,6 +179,7 @@ fi
 %doc README THANKS TODO
 %attr(755,root,root) %{_sbindir}/*
 %attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsid.conf
+%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/initiatorname.iscsi
 %attr(754,root,root) /etc/rc.d/init.d/iscsi
 %attr(640,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/sysconfig/iscsi
 %endif

@@ -115,15 +115,15 @@ install -d $RPM_BUILD_ROOT/var/lib/iscsi
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 
-install iscsi_if-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
+install kernel/iscsi_if-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
 	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_if.ko
-install iscsi_tcp-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
+install kernel/iscsi_tcp-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
         $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_tcp.ko
 
 %if %{with smp} && %{with dist_kernel}
-install iscsi_if-smp.ko \
+install kernel/iscsi_if-smp.ko \
 	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_if.ko
-install iscsi_tcp-smp.ko \
+install kernel/iscsi_tcp-smp.ko \
         $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_tcp.ko
 %endif
 %endif

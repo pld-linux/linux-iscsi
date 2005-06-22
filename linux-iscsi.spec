@@ -11,13 +11,14 @@
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
-Version:	5.0.0.2
+Version:	5.0.0.0.3
+%define		_rc  rc6-363
 %define		_rel 0.1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
-Source0:	http://dl.sourceforge.net/linux-iscsi/%{name}-%{version}.tar.gz
-# Source0-md5:	2d29f3c35554e3ea0abf46de39e6b215
+Source0:	http://dl.sourceforge.net/linux-iscsi/%{name}-%{version}%{_rc}.tar.gz
+# Source0-md5:	3df59acaf3e9d3011e417873417eb0bf
 Source1:	%{name}.init
 Source2:	%{name}.sysconfig
 URL:		http://linux-iscsi.sourceforge.net/
@@ -70,11 +71,13 @@ IP over SCSI SMP kernel module.
 Modu³ j±dra SMP dla protoko³u IP over SCSI.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}%{_rc}
 
 %build
 %if %{with kernel}
 cd kernel
+patch < backward-compile-2.6.11.patch
+
 # kernel module(s)
 for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
 	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
@@ -95,8 +98,8 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
 		CC="%{__cc}" \
 		M=$PWD O=$PWD \
 		%{?with_verbose:V=1}
-	mv iscsi_if{,-$cfg}.ko
 	mv iscsi_tcp{,-$cfg}.ko
+	mv scsi_transport_iscsi{,-$cfg}.ko
 done
 cd ..
 %endif
@@ -104,7 +107,7 @@ cd ..
 %if %{with userspace}
 %{__make} -C usr \
 	CC="%{__cc}" \
-	CFLAGS="%{rpmcflags} -I../include -DNETLINK_ISCSI=10"
+	CFLAGS="%{rpmcflags} -I../include -DLinux -DNETLINK_ISCSI=10"
 %endif
 
 %install
@@ -114,16 +117,16 @@ install -d $RPM_BUILD_ROOT{%{_sbindir},%{_mandir}/man{1,5,8},/etc/{rc.d/init.d,s
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 
-install kernel/iscsi_if-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_if.ko
 install kernel/iscsi_tcp-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
-        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_tcp.ko
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/iscsi_tcp.ko
+install kernel/scsi_transport_iscsi-%{?with_dist_kernel:up}%{!?with_dist_kernel:nondist}.ko \
+        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/scsi_transport_iscsi.ko
 
 %if %{with smp} && %{with dist_kernel}
-install kernel/iscsi_if-smp.ko \
-	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_if.ko
 install kernel/iscsi_tcp-smp.ko \
-        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_tcp.ko
+	$RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/iscsi_tcp.ko
+install kernel/scsi_transport_iscsi-smp.ko \
+        $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/scsi_transport_iscsi.ko
 %endif
 %endif
 

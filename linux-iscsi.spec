@@ -1,6 +1,4 @@
 #
-# TODO: init scripts rewrite
-#
 # Conditional build:
 %bcond_without	dist_kernel	# allow non-distribution kernel
 %bcond_without	kernel		# don't build kernel modules
@@ -13,7 +11,7 @@ Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
 Version:	5.0.0.0.3
 %define		_rc  rc6-363
-%define		_rel 0.1
+%define		_rel 1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel

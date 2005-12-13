@@ -127,9 +127,9 @@ install iscsi_sfnet-smp.ko \
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iscsi
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/sysconfig/iscsi
 
-install misc/iscsi.conf $RPM_BUILD_ROOT/etc
-:> $RPM_BUILD_ROOT/etc/fstab.iscsi
-:> $RPM_BUILD_ROOT/etc/initiatorname.iscsi
+install misc/iscsi.conf $RPM_BUILD_ROOT%{_sysconfdir}
+:> $RPM_BUILD_ROOT%{_sysconfdir}/fstab.iscsi
+:> $RPM_BUILD_ROOT%{_sysconfdir}/initiatorname.iscsi
 
 :> $RPM_BUILD_ROOT/var/lib/iscsi/bindings
 
@@ -184,14 +184,14 @@ fi
 %defattr(644,root,root,755)
 %doc README
 %attr(755,root,root) %{_sbindir}/*
-%attr(750,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/iscsi.conf
-%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/fstab.iscsi
-%attr(644,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/initiatorname.iscsi
+%attr(750,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/iscsi.conf
+%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/fstab.iscsi
+%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/initiatorname.iscsi
 %dir /var/lib/iscsi
 %ghost /var/lib/iscsi/bindings
 %attr(644,root,root) %{_mandir}/man?/*
 %attr(754,root,root) /etc/rc.d/init.d/iscsi
-%attr(640,root,root) %config(noreplace) %verify(not mtime md5 size) /etc/sysconfig/iscsi
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/iscsi
 %endif
 
 %if %{with kernel}

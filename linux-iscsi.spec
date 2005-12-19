@@ -185,11 +185,11 @@ fi
 %doc README
 %attr(755,root,root) %{_sbindir}/*
 %attr(750,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/iscsi.conf
-%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/fstab.iscsi
-%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/initiatorname.iscsi
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/fstab.iscsi
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/initiatorname.iscsi
 %dir /var/lib/iscsi
 %ghost /var/lib/iscsi/bindings
-%attr(644,root,root) %{_mandir}/man?/*
+%{_mandir}/man?/*
 %attr(754,root,root) /etc/rc.d/init.d/iscsi
 %attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/iscsi
 %endif
@@ -197,11 +197,11 @@ fi
 %if %{with kernel}
 %files -n kernel-iscsi
 %defattr(644,root,root,755)
-%attr(644,root,root) /lib/modules/%{_kernel_ver}/misc/*
+/lib/modules/%{_kernel_ver}/misc/*
 
 %if %{with smp} && %{with dist_kernel}
 %files -n kernel-smp-iscsi
 %defattr(644,root,root,755)
-%attr(644,root,root) /lib/modules/%{_kernel_ver}smp/misc/*
+/lib/modules/%{_kernel_ver}smp/misc/*
 %endif
 %endif

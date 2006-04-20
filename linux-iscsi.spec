@@ -6,11 +6,11 @@
 %bcond_without	userspace	# don't build userspace module
 %bcond_with	verbose		# verbose build (V=1)
 #
+%define		_rel 0.1
 Summary:	iSCSI - SCSI over IP
 Summary(pl):	iSCSI - SCSI po IP
 Name:		linux-iscsi
 Version:	4.0.2
-%define		_rel 0.1
 Release:	%{_rel}
 License:	GPL
 Group:		Base/Kernel
@@ -22,6 +22,8 @@ Patch0:		%{name}-sysfs.patch
 URL:		http://linux-iscsi.sourceforge.net/
 %{?with_dist_kernel:BuildRequires:	kernel-headers >= 2.6.0}
 BuildRequires:	sysfsutils-static
+Requires(post,preun):	/sbin/chkconfig
+Requires:	rc-scripts
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_sbindir	/sbin

@@ -73,7 +73,7 @@ Moduł jądra SMP dla protokołu IP over SCSI.
 
 %prep
 %setup -q
-%patch0 -p1
+%patch -P0 -p1
 
 %build
 %if %{with kernel}
